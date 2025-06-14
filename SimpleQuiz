@@ -1,0 +1,95 @@
+import java.util.*;
+
+public class SimpleQuiz {
+    static Scanner scanner = new Scanner(System.in);
+    static int score = 0;
+    static String[] userAnswers;
+    static int timeLimit = 10; // seconds per question
+    static boolean answered;
+
+    // Question class to hold data
+    static class Question {
+        String question;
+        String[] options;
+        String answer;
+
+        Question(String question, String[] options, String answer) {
+            this.question = question;
+            this.options = options;
+            this.answer = answer;
+        }
+    }
+
+    public static void main(String[] args) {
+        // Define quiz questions
+        Question[] quiz = {
+            new Question("What is the capital of France?",
+                new String[]{"A. Paris", "B. London", "C. Rome", "D. Berlin"}, "A"),
+            new Question("What is the largest planet?",
+                new String[]{"A. Earth", "B. Mars", "C. Jupiter", "D. Venus"}, "C"),
+            new Question("Who wrote 'Hamlet'?",
+                new String[]{"A. Dickens", "B. Shakespeare", "C. Keats", "D. Orwell"}, "B")
+        };
+
+        userAnswers = new String[quiz.length];
+
+        System.out.println("Welcome to the Quiz!");
+        System.out.println("You have " + timeLimit + " seconds to answer each question.\n");
+
+        for (int i = 0; i < quiz.length; i++) {
+            askQuestion(quiz[i], i);
+        }
+
+        // Show final results
+        System.out.println("\nQuiz Over!");
+        System.out.println("Your Score: " + score + "/" + quiz.length);
+        System.out.println("Summary:");
+        for (int i = 0; i < quiz.length; i++) {
+            String correct = quiz[i].answer;
+            String user = userAnswers[i];
+            String status;
+            if (user == null) {
+                user = "Time Out";
+                status = "Time Out";
+            } else if (user.equalsIgnoreCase(correct)) {
+                status = "Correct";
+            } else {
+                status = "Incorrect";
+            }
+            System.out.println("Q" + (i + 1) + ": " + quiz[i].question);
+            System.out.println("Your Answer: " + user + " | Correct Answer: " + correct + " | " + status + "\n");
+        }
+    }
+
+    static void askQuestion(Question q, int index) {
+        System.out.println("Q" + (index + 1) + ": " + q.question);
+        for (String opt : q.options) {
+            System.out.println(opt);
+        }
+
+        answered = false;
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+                if (!answered) {
+                    System.out.println("\n⏰ Time's up!");
+                    userAnswers[index] = null;
+                    answered = true;
+                }
+            }
+        }, timeLimit * 1000);
+
+        String input = scanner.nextLine().trim().toUpperCase();
+        if (!answered) {
+            answered = true;
+            userAnswers[index] = input;
+            if (input.equalsIgnoreCase(q.answer)) {
+                System.out.println("✅ Correct!\n");
+                score++;
+            } else {
+                System.out.println("❌ Incorrect!\n");
+            }
+            timer.cancel();
+        }
+    }
+}
